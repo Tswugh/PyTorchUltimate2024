@@ -44,36 +44,38 @@ optimizer = torch.optim.SGD(model.parameters(), lr=LR)
 # %%
 losses, slope, bias = [], [], []
 epochs = 2000
+BATCH_SIZE = 2
 
 for epoch in range(epochs):
-    optimizer.zero_grad()
+    for i in range(0, X.shape[0], BATCH_SIZE):
+        optimizer.zero_grad()
 
-    y_pred = model(X)
-    loss = loss_func(y_pred, y_true)
-    loss.backward()
+        y_pred = model(X[i:i+BATCH_SIZE])
+        loss = loss_func(y_pred, y_true[i:i+BATCH_SIZE])
+        loss.backward()
 
-    optimizer.step()
+        optimizer.step()
 
-    for name, param in model.named_parameters():
-        if param.requires_grad:
-            if name == "linear.weight":
-                slope.append(param.data.numpy()[0][0])
-            if name == "linear.bias":
-                bias.append(param.data.numpy()[0])
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                if name == "linear.weight":
+                    slope.append(param.data.numpy()[0][0])
+                if name == "linear.bias":
+                    bias.append(param.data.numpy()[0])
 
-    losses.append(float(loss.data))
+        losses.append(float(loss.data))
 
-    if epoch % 100 == 0:
-        print("Epoch: {}, Loss: {:.4f}".format(epoch, loss.data))
-
-# %%
-sns.scatterplot(x=range(epochs), y=losses)
+        if epoch % 100 == 0:
+            print("Epoch: {}, Loss: {:.4f}".format(epoch, loss.data))
 
 # %%
-sns.scatterplot(x=range(epochs), y=bias)
+sns.scatterplot(x=range(len(losses)), y=losses)
 
 # %%
-sns.scatterplot(x=range(epochs), y=slope)
+sns.scatterplot(x=range(len(bias)), y=bias)
+
+# %%
+sns.scatterplot(x=range(len(slope)), y=slope)
 
 # %%
 y_pred = model(X).data.numpy().reshape(-1)
