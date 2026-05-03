@@ -104,3 +104,18 @@ sns.scatterplot(x=range(len(slope)), y=slope)
 y_pred = model(X).data.numpy().reshape(-1)
 sns.scatterplot(x=X_list, y=y_list)
 sns.lineplot(x=X_list, y=y_pred, color='red')
+
+# %%
+model.state_dict()
+
+# %%
+torch.save(model.state_dict(), 'model_state_dict.pth')
+
+# %%
+model = LinearRegressionTorch(in_size=in_dim, out_size=out_dim)
+model.load_state_dict(torch.load('model_state_dict.pth'))
+
+# %%
+model.state_dict()
+
+# %%
